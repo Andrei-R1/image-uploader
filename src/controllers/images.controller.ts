@@ -2,31 +2,26 @@ import { Request, Response } from "express";
 import { UploadImageSchema } from "../models/image.models";
 import imageService from "../services/image.service";
 import { BaseController } from "../types/base.controller";
+import { HttpError } from "../types/custom.error";
 
 class ImagesController extends BaseController{
-  async getImage(req: Request, res: Response) {
+  async getImage(req: Request | any, res: Response) {
     try{
-      const result = await imageService.findImageById(Number(req.params.id));
-        this.responseHandler(res, result, 200);
+      const { id } = req.params;
+      if(!id) throw new HttpError("Image id is required", 400);
+      this.responseHandler(res, await imageService.findImageById(req.user.id, Number(id)), 200);
     }catch(error: any){
-      if (error.code && error.code === "P2002") {
-        this.responseHandler(res, { error: "Image not found" }, 404);
-      }
       this.errorHandler(res, error);
     }
   }
 
-  async uploadImage(req: Request, res: Response) {
+  async uploadImage(req: Request | any, res: Response) {
     try {
       const data = await UploadImageSchema.validateAsync(req.body);
-      const result = await imageService.createImage(data.url);
+      const result = await imageService.createImage(data, req.user);
       this.responseHandler(res, result, 200);
     } catch (error: any) {
-      if (error.code && error.code === "P2002") {
-        this.responseHandler(res, { error: "Image was already uploaded" }, 400);
-      } else {
-        this.errorHandler(res, error);
-      }
+      this.errorHandler(res, error);
     }
   }
 }

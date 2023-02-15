@@ -29,11 +29,11 @@ export async function authMiddleware(
   next: NextFunction
 ) {
   try {
-    const { SECRET } = process.env;
+    const { SECRET_KEY } = process.env;
 
     const token = getAccessTokenFromHeader(req);
     const verifyAsync: any = promisify(jwt.verify).bind(jwt);
-    const payload = await verifyAsync(token, SECRET);
+    const payload = await verifyAsync(token, SECRET_KEY);
 
     if (!req.user) {
       const user = await userService.findUserByEmail(payload.email);
