@@ -15,7 +15,7 @@ class ImageService {
       const image = await prisma.image.findUnique({ where: { id } });
       if (!image) {
         throw new HttpError("Image not found", 404);
-      } else if (image?.userId !== userId) {
+      } else if (image.userId !== userId) {
         throw new HttpError("You are not authorized to view this image", 401);
       } else {
         return image;
